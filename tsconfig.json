@@ -12,6 +12,9 @@
     "noEmit": true,
     "outDir": "dist",
     "resolveJsonModule": true,
+    "paths": {
+      "@duitku/*": ["./src/*"]
+    },
 
     "types": ["vitest/globals"]
   }
