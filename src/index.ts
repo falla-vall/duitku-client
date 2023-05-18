@@ -4,7 +4,9 @@ import { Signature, combineUrl, currentDate } from "@duitku/utils";
 
 import type {
   DuitkuClientOptions,
-  PaymentMethod,
+  PaymentMethodResponse,
+  RequestTransactionPayload,
+  RequestTransactionResponse,
 } from "@duitku/types/duitku-client.type";
 
 /**
@@ -59,6 +61,23 @@ export class DuitkuClient {
       signature,
     };
     const { data } = await this.httpClient.post(url, payload);
-    return data.paymentFee as PaymentMethod[];
+    return data.paymentFee as PaymentMethodResponse[];
+  }
+
+  async requestTransaction(_payload: RequestTransactionPayload) {
+    const url = combineUrl(
+      apiConfig({ sandbox: this.sandbox }).baseApiUrl,
+      "v2/inquiry",
+    );
+    const signature = new Signature(
+      `${this.merchantCode}${_payload.merchantOrderId}${_payload.paymentAmount}${this.apiKey}`,
+    ).md5();
+    const payload = {
+      merchantCode: this.merchantCode,
+      signature,
+      ..._payload,
+    };
+    const { data } = await this.httpClient.post(url, payload);
+    return data as RequestTransactionResponse;
   }
 }
