@@ -3,6 +3,7 @@ import apiConfig from "@duitku/configs/api.config";
 import { Signature, combineUrl, currentDate } from "@duitku/utils";
 
 import type {
+  CheckTransactionResponse,
   DuitkuClientOptions,
   PaymentMethodResponse,
   RequestTransactionPayload,
@@ -79,5 +80,31 @@ export class DuitkuClient {
     };
     const { data } = await this.httpClient.post(url, payload);
     return data as RequestTransactionResponse;
+  }
+
+  async checkTransaction(merchantOrderId: string) {
+    const url = combineUrl(
+      apiConfig({ sandbox: this.sandbox }).baseApiUrl,
+      "transactionStatus",
+    );
+    const signature = new Signature(
+      `${this.merchantCode}${merchantOrderId}${this.apiKey}`,
+    ).md5();
+    const payload = {
+      merchantCode: this.merchantCode,
+      merchantOrderId,
+      signature,
+    };
+    const { data } = await this.httpClient.post(url, payload);
+    return data as CheckTransactionResponse;
+  }
+
+  async watchTransaction(merchantOrderId: string) {
+    let response = await this.checkTransaction(merchantOrderId);
+    while (response.statusCode === "01") {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      response = await this.checkTransaction(merchantOrderId);
+    }
+    return response;
   }
 }

@@ -19,6 +19,14 @@ export interface RequestTransactionResponse {
   statusMessage: string;
 }
 
+export interface CheckTransactionResponse {
+  merchantOrderId: string;
+  reference: string;
+  amount: string;
+  statusCode: "00" | "01" | "02";
+  statusMessage: string;
+}
+
 export interface Address {
   firstName?: string;
   lastName?: string;
